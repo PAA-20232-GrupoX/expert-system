@@ -1,0 +1,20 @@
+C rede convolutiva, (S imagens, S reconhecimento de padrões), 0.85
+C rede convolutiva, (S imagens, S grande volume de dados, S alta variabilidade), 0.75
+C modelo baseado em transformadores, (S imagens, S tarefa de segmentação), 0.7
+C BERT para análise de sentimento, (S texto, S análise de sentimento), 0.9
+C LSTM para sequências temporais, (S texto, S sequência temporal), 0.8
+C transformador para tradução, (S texto, S tarefa de tradução), 0.85
+C árvore de decisão, (S dados categóricos, S pequeno volume de dados), 0.75
+C Random Forest, (S dados categóricos, S dados faltantes), 0.8
+C SVM, (S dados contínuos, S pequena quantidade de features), 0.7
+C regressão linear, (S dados lineares, NOT S grande complexidade), 0.8
+C K-means, (S dados agrupáveis, S sem rótulos), 0.75
+C rede neural profunda, (S grande volume de dados, S alta complexidade), 0.9
+C algoritmo genético, (S otimização de parâmetros, S espaço de solução grande), 0.6
+C redes Bayesianas, (S incerteza, S dados probabilísticos), 0.7
+C algoritmo de agrupamento hierárquico, (S dados não rotulados, S necessidade de hierarquia), 0.65
+C regressão logística, (S classificação binária, S dados lineares), 0.8
+C Naive Bayes, (S classificação, S dados textuais), 0.7
+C algoritmo A*, (S busca de caminho, S espaço de estado grande), 0.8
+C algoritmo de Floresta Aleatória, (S classificação, S grande quantidade de dados), 0.85
+S sintoma 1, NOT (S sintoma 2, NOT S sintoma 3), 0.3
