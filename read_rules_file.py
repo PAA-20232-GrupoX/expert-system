@@ -82,8 +82,8 @@ def read_entry(lines, all_symptoms):
 
     for node in all_nodes:
         if node not in has_parent:
-            reversed_graph[node].append(["", 0])
+            reversed_graph[node].append(["", 0.0])
         if node not in has_child:
-            reversed_graph["!"].append([node, 0])
+            reversed_graph["!"].append([node, 0.0])
 
     return reversed_graph

@@ -1,5 +1,6 @@
 from collections import deque
 from read_rules_file import *
+from preprocess import *
 
 # A mudar:
 #     O grafo é salvado como final_graph (linha 191), ainda falta criar o JSON
@@ -56,7 +57,7 @@ def pop_stack(stack):
         if len(stack) == 1:
             return True
         stack.pop()
-        pop_stack(stack)
+        return pop_stack(stack)
 
     return False
 
@@ -126,15 +127,80 @@ def check_question_unitary(stack, already_quest):
     return "s"
 
 
+def check_question_unitary_pp(stack, already_quest, preprocess):
+    nodes, index = stack[-1]
+    string = nodes[index][0]
+    for symptom in string.split(";"):
+        if symptom not in already_quest:
+            while True:
+                print(f'Vc tem {preprocess.name_conversion[int(symptom)]}?')
+                aux_answer = input()
+
+                if aux_answer == "s":
+                    already_quest[symptom] = True
+                    break
+                elif aux_answer == "n":
+                    already_quest[symptom] = False
+                    return "n"
+                elif aux_answer == "ns":
+                    return "ns"
+        else:
+            if not already_quest[symptom]:
+                return "n"
+    return "s"
+
+
+def graphviz_debug(graph):
+    buffer = []
+
+    for u in graph:
+        for v in graph[u]:
+            if u != "":
+                buffer.append(f"\"{u}\" -- \"{v[0]}\" [label={v[1]}]")
+            else:
+                buffer.append(f"\"i\" -- \"{v[0]}\" [label={v[1]}]")
+
+    return "\n".join(buffer)
+
+
+def graphviz_debug_pp(graph, pp):
+    names = pp.name_conversion
+    with open("graphviz.txt", "w", encoding="utf8") as f:
+        for u in graph:
+            for v in graph[u]:
+                if u != "":
+                    try:
+                        f.write(f"\"{names[int(u)]}({u})\" -- ")
+                    except Exception:
+                        f.write(f"\"{u}\" -- ")
+
+                    try:
+                        f.write(f"\"{names[int(v[0])]}({v[0]})\" [label={v[1]}]")
+                    except Exception:
+                        f.write(f"\"{v[0]}\" [label={v[1]}]")
+
+                    f.write("\n")
+
+                else:
+                    f.write(f"\"i\" -- ")
+                    try:
+                        f.write(f"\"{names[int(v[0])]}({v[0]})\" [label={v[1]}]")
+                    except Exception:
+                        f.write(f"\"{v[0]}\" [label={v[1]}]")
+                    f.write("\n")
+
+
 if __name__ == "__main__":
     file_path = "teste1.txt"
 
     with open(file_path, "r", encoding="utf8") as f:
         file_lines = f.readlines()
+    preprocess = PreProcess(file_path)
+    preprocess.execute()
 
-    all_symptoms = read_symptoms_lines(file_lines)
+    all_symptoms = preprocess.all_symptoms
 
-    reversed_graph = read_entry(file_lines, all_symptoms)
+    reversed_graph = read_entry(preprocess.lines, all_symptoms)
 
     back_propagate(reversed_graph)
     final_graph = reverse_graph(reversed_graph)
@@ -142,21 +208,31 @@ if __name__ == "__main__":
     stack = [[sorted(final_graph[""], key=lambda x: -x[1]), 0]]
 
     print(final_graph)
+    graphviz_debug(final_graph)
+    # graphviz_debug_pp(final_graph, preprocess)
+    print(all_symptoms)
+    print(preprocess.name_conversion)
     print()
 
     already_questioned = {}
+
+    for i in preprocess.lines:
+        print(i)
 
     res = None
     while True:
         for i in stack:
             print(i)
         # answer = check_question(stack)
-        answer = check_question_unitary(stack, already_questioned)
+        answer = check_question_unitary_pp(stack, already_questioned, preprocess)
         res = iterate_stack(answer, final_graph, stack)
         for i in stack:
             print(i)
         print("--------")
 
         if res:
-            print(f"Logo vc tem {res}!")
+            if res == "?":
+                print("Erro logico: Negou sintomas de mais")
+            else:
+                print(f"Logo vc tem {preprocess.name_conversion[int(res)]}!")
             break

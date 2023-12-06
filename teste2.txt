@@ -13,7 +13,6 @@
 “C algoritmo genético”, (“S otimização de parâmetros”; “S espaço de solução grande”), 0.6
 “C redes Bayesianas”, (“S incerteza”; “S dados probabilísticos”), 0.7
 “C algoritmo de agrupamento hierárquico”, (“S dados não rotulados”; “S necessidade de hierarquia”), 0.65
-“C algoritmo de agrupamento hierárquico”, (“S imagens”), 0.0
 “C regressão logística”, (“S classificação binária”; “S dados lineares”), 0.8
 “C Naive Bayes”, (“S classificação”; “S dados textuais”), 0.7
 “C algoritmo A*”, (“S busca de caminho”; “S espaço de estado grande”), 0.8
