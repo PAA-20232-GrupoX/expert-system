@@ -1,70 +1,13 @@
-from collections import defaultdict, deque
+from collections import deque
+from read_rules_file import *
 
 # A mudar:
-#   Atualmente a entrada lê um arquivo simplicado (linha 35):
-#       X, A, B, 0.5
-#   Mas deveria ler o por meio do parse, ou seja, ler regras da forma
-#       X , Not (A; Not B), 0.6
-#
 #     O grafo é salvado como final_graph (linha 191), ainda falta criar o JSON
 # a partir do grafo (dica DFS)
-#
-#   Falta implementar os casos com o NOT
 #
 # OBS:
 # "" é o nó inicial e "!" é o nó terminal. As respostas são "s", "n" e "ns".
 # Há dois arquivos de teste (teste1 e teste2), se quiser mudar mude em linha 188
-
-
-def string_to_set(string):
-    if len(string):
-        return set(string.split(";"))
-    return set()
-
-
-def read_entry(path):
-    all_nodes = set()
-
-    reversed_graph = defaultdict(list)
-    has_child = set()
-    has_parent = set()
-
-    with open(path, "r", encoding="utf-8") as f:
-        for line in f.readlines():
-            aux = line.split(", ")
-            c, s, prob = aux[0], ";".join(sorted(aux[1:-1])), float(aux[-1])
-
-            # add node to all nodes
-            all_nodes.add(c)
-            all_nodes.add(s)
-
-            # append in the graphs
-            reversed_graph[c].append([s, prob])
-            has_child.add(s)
-            has_parent.add(c)
-
-    all_nodes = sorted(list(all_nodes), key=len)
-    all_nodes_set = [string_to_set(i) for i in all_nodes]
-
-    nodes_size = len(all_nodes)
-
-    for i in range(nodes_size):
-        for j in range(i+1, nodes_size):
-            if all_nodes_set[i].issubset(all_nodes_set[j]):
-                node_i = all_nodes[i]
-                node_j = all_nodes[j]
-
-                reversed_graph[node_j].append([node_i, 0.0])
-                has_child.add(node_i)
-                has_parent.add(node_j)
-
-    for node in all_nodes:
-        if node not in has_parent:
-            reversed_graph[node].append(["", 0])
-        if node not in has_child:
-            reversed_graph["!"].append([node, 0])
-
-    return reversed_graph
 
 
 def back_propagate(reversed_graph):
@@ -163,7 +106,6 @@ def check_question(stack):
 def check_question_unitary(stack, already_quest):
     nodes, index = stack[-1]
     string = nodes[index][0]
-
     for symptom in string.split(";"):
         if symptom not in already_quest:
             while True:
@@ -185,7 +127,14 @@ def check_question_unitary(stack, already_quest):
 
 
 if __name__ == "__main__":
-    reversed_graph = read_entry("teste1.txt")
+    file_path = "teste1.txt"
+
+    with open(file_path, "r", encoding="utf8") as f:
+        file_lines = f.readlines()
+
+    all_symptoms = read_symptoms_lines(file_lines)
+
+    reversed_graph = read_entry(file_lines, all_symptoms)
 
     back_propagate(reversed_graph)
     final_graph = reverse_graph(reversed_graph)
