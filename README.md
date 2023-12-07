@@ -19,6 +19,12 @@ Execute o script main.py para converter as regras do formato de texto para JSON.
 bash
 Copy code
 python main.py
+
+Executar servidor:
+```
+uvicorn server:app --reload
+```
+
 ## Analisar Condições:
 
 Utilize as regras convertidas em JSON para realizar inferências sobre as condições específicas.
