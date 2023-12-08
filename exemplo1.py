@@ -1,10 +1,12 @@
-from graph import  *
+from graph import *
 
 
+# Migrated to graph
 def receive_from_answer():
     return input()
 
 
+# Migrated to graph
 def send_next_symptom(stack, already_quest):
     nodes, index = stack[-1]
     string = nodes[index][0]
@@ -20,6 +22,10 @@ class MetaData:
         self.stack = stack
 
 
+def send_dict_dict(dict):
+    return dict
+
+
 def send_metadata(metadata):
     return metadata
 
@@ -28,14 +34,19 @@ if __name__ == "__main__":
     ################ Começo Inicialização
 
     # Local do arquivo
-    file_path = "teste1.txt"
+    file_path = "teste2.txt"
 
     with open(file_path, "r", encoding="utf8") as f:
         file_lines = f.readlines()
 
-    all_symptoms = read_symptoms_lines(file_lines)
+    # all_symptoms = read_symptoms_lines(file_lines)
+    preprocess = PreProcess(file_path)
+    preprocess.execute()
 
-    reversed_graph = read_entry(file_lines, all_symptoms)
+    all_symptoms = preprocess.all_symptoms
+
+    # reversed_graph = read_entry(file_lines, all_symptoms)
+    reversed_graph = read_entry(preprocess.lines, all_symptoms)
     back_propagate(reversed_graph)
 
     final_graph = reverse_graph(reversed_graph)
@@ -43,27 +54,12 @@ if __name__ == "__main__":
 
     already_questioned = {}
     ################ Fim inicialização
+
+    print(f"Dicionario mandado: {send_dict_dict(preprocess.name_conversion)}")
+
     while True:
-
-        # Aqui manda o próximo sintoma para gerar a pergunta *********************
-        next_symptom = send_next_symptom(stack, already_questioned)
-
-        if next_symptom == "ended":
-            print("Erro logico: Negou sintomas de mais")
-            break
-        print(f'Vc tem {next_symptom}?')
-
-        # Aqui recebe a resposta da pergunta ***************************************
-        answer = receive_from_answer()
-
-        print(f"Sintoma enviado: {next_symptom}?")
-        print(f"Resposta recebida: {answer}")
-
-        if answer == "s":
-            already_questioned[next_symptom] = True
-        elif answer == "n":
-            already_questioned[next_symptom] = False
-
+        print()
+        answer = check_question_unitary(stack, already_questioned, preprocess)  # SEND AND RECEIVE HERE
         result = iterate_stack(answer, final_graph, stack)
 
         metadata = MetaData(result, stack)
@@ -77,6 +73,6 @@ if __name__ == "__main__":
             if result == "?":
                 print("Erro logico: Negou sintomas de mais")
             else:
-                print(f"Logo vc tem {result}!")
+                print(f"Logo vc tem {preprocess.name_conversion[int(result)]}!")
             break
 

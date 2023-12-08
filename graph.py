@@ -96,57 +96,78 @@ def iterate_stack(answer, graph, stack):
     return None
 
 
-def check_question(stack):
-    nodes, index = stack[-1]
-    string = nodes[index][0]
+# Receive "s", "n" or "ns"
+def receive_answer():
+    while True:
+        answer = input()
+        if answer in ("s", "n", "ns"):
+            return answer
 
-    print(f'Vc tem {" e ".join(string.split(";"))}?')
-    return input()
+
+# Must send "preprocess.name_conversion[int(question)]"
+def send_question(question, preprocess):
+    print(f"Vc tem {preprocess.name_conversion[int(question)]}?")
 
 
-def check_question_unitary(stack, already_quest):
-    nodes, index = stack[-1]
-    string = nodes[index][0]
-    for symptom in string.split(";"):
-        if symptom not in already_quest:
-            while True:
-                print(f'Vc tem {symptom}?')
-                aux_answer = input()
+def check_question(question, already_questioned, preprocess):
+    if question[0] == "*":
+        real_question = question[1:]
 
-                if aux_answer == "s":
-                    already_quest[symptom] = True
-                    break
-                elif aux_answer == "n":
-                    already_quest[symptom] = False
-                    return "n"
-                elif aux_answer == "ns":
-                    return "ns"
-        else:
-            if not already_quest[symptom]:
+        if real_question in already_questioned:
+            if already_questioned[real_question]:
                 return "n"
-    return "s"
+            else:
+                return "s"
 
-
-def check_question_unitary_pp(stack, already_quest, preprocess):
-    nodes, index = stack[-1]
-    string = nodes[index][0]
-    for symptom in string.split(";"):
-        if symptom not in already_quest:
-            while True:
-                print(f'Vc tem {preprocess.name_conversion[int(symptom)]}?')
-                aux_answer = input()
-
-                if aux_answer == "s":
-                    already_quest[symptom] = True
-                    break
-                elif aux_answer == "n":
-                    already_quest[symptom] = False
-                    return "n"
-                elif aux_answer == "ns":
-                    return "ns"
         else:
-            if not already_quest[symptom]:
+            send_question(real_question, preprocess)
+            answer = receive_answer()  # **************
+            if answer == "s":
+                already_questioned[real_question] = True
                 return "n"
+            if answer == "n":
+                already_questioned[real_question] = False
+                return "s"
+
+            return "ns"
+
+    else:
+        if question in already_questioned:
+            if already_questioned[question]:
+                return "s"
+            else:
+                return "n"
+
+        send_question(question, preprocess)
+        answer = receive_answer()
+        if answer == "s":
+            already_questioned[question] = True
+            return "s"
+        if answer == "n":
+            already_questioned[question] = False
+            return "n"
+
+    return "ns"
+
+
+def check_question_unitary(stack, already_questioned, preprocess):
+    nodes, index = stack[-1]
+    rule = nodes[index][0]
+
+    match = re.match("\*\((.*)", rule)
+    if match:
+        for question in match.groups()[0].split(";"):
+            answer = check_question(question, already_questioned, preprocess)
+            if answer == "s":
+                return "n"
+            if answer == "ns":
+                return "ns"
+        return "n"
+
+    for question in rule.split(";"):
+        answer = check_question(question, already_questioned, preprocess)
+        if answer in ("n", "ns"):
+            return answer
     return "s"
 
 
@@ -191,7 +212,7 @@ def graphviz_debug_pp(graph, pp):
 
 
 if __name__ == "__main__":
-    file_path = "teste1.txt"
+    file_path = "teste2.txt"
 
     with open(file_path, "r", encoding="utf8") as f:
         file_lines = f.readlines()
@@ -208,8 +229,8 @@ if __name__ == "__main__":
     stack = [[sorted(final_graph[""], key=lambda x: -x[1]), 0]]
 
     print(final_graph)
-    graphviz_debug(final_graph)
-    # graphviz_debug_pp(final_graph, preprocess)
+    # graphviz_debug(final_graph)
+    graphviz_debug_pp(final_graph, preprocess)
     print(all_symptoms)
     print(preprocess.name_conversion)
     print()
@@ -219,12 +240,15 @@ if __name__ == "__main__":
     for i in preprocess.lines:
         print(i)
 
+    # print("***************", rule_to_set("11;8", all_symptoms))
+
     res = None
     while True:
         for i in stack:
             print(i)
         # answer = check_question(stack)
-        answer = check_question_unitary_pp(stack, already_questioned, preprocess)
+        # answer = check_question_unitary_pp(stack, already_questioned, preprocess)
+        answer = check_question_unitary(stack, already_questioned, preprocess)
         res = iterate_stack(answer, final_graph, stack)
         for i in stack:
             print(i)

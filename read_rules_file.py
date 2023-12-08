@@ -11,39 +11,51 @@ def read_symptoms_lines(file_lines):
     return res
 
 
-def combine_line(line, symptoms_set):
-    res = set()
-    for symptom in line.split(";"):
-        match = re.match("\s*(NOT|)\s*“(?:S|C)\s*((?:(?:\w|\*|-)*\s*)*)”", symptom).groups()
+def combine_symptoms(symptoms):
+    aux = symptoms.split(";")
+
+    for i in range(len(aux)):
+        match = re.match("\s*(NOT|)\s*“(?:S|C)\s*((?:(?:\w|\*|-)*\s*)*)”", aux[i]).groups()
         if match[0] == "NOT":
-            aux_set = set()
-            aux_set.add(match[1])
-            res = res.union(symptoms_set.difference(aux_set))
+            aux[i] = "*" + match[1]
         else:
-            res.add(match[1])
-    return res
+            aux[i] = match[1]
+
+    return ";".join(sorted(aux))
 
 
-def new_command(line, symptoms_set):
-
-    match_total = re.match("“(?:S|C)\s*((?:(?:\w|\*|-)*\s*)*)”,\s*(NOT|)\s+\((.*)\),\s*([0-9.]+)",
+def read_new_command(line):
+    match_total = re.match("“(?:S|C)\s*((?:(?:\w|\*|-)*\s*)*)”,\s*(NOT|)\s*\((.*)\),\s*([0-9.]+)",
                            line)
-    if not match_total:
-        print(line)
     match = match_total.groups()
+    if match[1] == "":
+        return match[0], combine_symptoms(match[2]), float(match[3])
 
-    if match[1] == "NOT":
-        res = symptoms_set.difference(combine_line(match[2], symptoms_set))
-    else:
-        res = combine_line(match[2], symptoms_set)
-
-    return match[0], ";".join(sorted(list(res))), float(match[3])
+    return match[0], "*("+combine_symptoms(match[2]),  float(match[3])
 
 
-def string_to_set(string):
-    if len(string):
-        return set(string.split(";"))
-    return set()
+def question_to_set(question, symptoms_set):
+    aux_set = set()
+    if question[0] == "*":
+        aux_set.add(question[1:])
+        return symptoms_set.difference(aux_set)
+    aux_set.add(question)
+    return aux_set
+
+
+def rule_to_set(rule, symptoms_set):
+    match = re.match("\*\((.*)", rule)
+
+    result_set = set()
+    if match:
+        for question in match.groups()[0].split(";"):
+            result_set = result_set.union(question_to_set(question, symptoms_set))
+        return symptoms_set.difference(result_set)
+
+    for question in rule.split(";"):
+        result_set = result_set.union(question_to_set(question, symptoms_set))
+
+    return result_set
 
 
 def read_entry(lines, all_symptoms):
@@ -54,7 +66,7 @@ def read_entry(lines, all_symptoms):
     has_parent = set()
 
     for line in lines:
-        c, s, prob = new_command(line, all_symptoms)
+        c, s, prob = read_new_command(line)
 
         # add node to all nodes
         all_nodes.add(c)
@@ -66,7 +78,8 @@ def read_entry(lines, all_symptoms):
         has_parent.add(c)
 
     all_nodes = sorted(list(all_nodes), key=len)
-    all_nodes_set = [string_to_set(i) for i in all_nodes]
+    # all_nodes = list(all_nodes)
+    all_nodes_set = [rule_to_set(i, all_symptoms) for i in all_nodes]
 
     nodes_size = len(all_nodes)
 
