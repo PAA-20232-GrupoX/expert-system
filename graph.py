@@ -12,26 +12,22 @@ from preprocess import *
 
 
 def back_propagate(reversed_graph):
-    visited_node = set()
 
     queue = deque()
     queue.append("!")
 
     while queue:
         node = queue.popleft()
-        if node not in visited_node:
-            visited_node.add(node)
+        for edges in reversed_graph[node]:
+            summed_val = edges[1]
+            next_edge = edges[0]
 
-            for edges in reversed_graph[node]:
-                summed_val = edges[1]
-                next_edge = edges[0]
+            queue.append(next_edge)
 
-                queue.append(next_edge)
+            inner_edges = reversed_graph[next_edge]
 
-                inner_edges = reversed_graph[next_edge]
-
-                for i in range(len(inner_edges)):
-                    inner_edges[i][1] += summed_val
+            for i in range(len(inner_edges)):
+                inner_edges[i][1] += summed_val
 
     return reversed_graph
 
