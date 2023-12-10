@@ -207,8 +207,61 @@ def graphviz_debug_pp(graph, pp):
                     f.write("\n")
 
 
+def remove_node(node, graph):
+    # graph[node].clear()
+    reversed_graph = reverse_graph(graph)
+    reversed_graph.pop(node)
+    graph.clear()
+    graph.update(reverse_graph(reversed_graph))
+
+
+def change_probability(new_prop, edge, graph):
+    old_prob = 0
+    for i in range(len(graph[edge[0]])):
+        val = graph[edge[0]][i]
+        if val[0] == edge[1]:
+            old_prob = val[1]
+            graph[edge[0]][i][1] = new_prop
+
+    increment = new_prop-old_prob
+    reversed_graph = reverse_graph(graph)
+
+    queue = deque()
+    queue.append(edge[0])
+
+    for i in range(len(reversed_graph[edge[0]])):
+        reversed_graph[edge[0]][i][1] += increment
+
+    while queue:
+        node = queue.popleft()
+        for edges in reversed_graph[node]:
+            next_edge = edges[0]
+
+            queue.append(next_edge)
+
+            inner_edges = reversed_graph[next_edge]
+
+            for i in range(len(inner_edges)):
+                inner_edges[i][1] += increment
+
+    graph.clear()
+    graph.update(reverse_graph(reversed_graph))
+
+
+def receive_messages(message, val, graph):
+    if message == "answer":
+        return val
+    if message == "pop":
+        remove_node(val, graph)
+        return val
+    if message == "restart":
+        return "r"
+
+    return
+
+
 if __name__ == "__main__":
-    file_path = "teste2.txt"
+    file_path = "teste1.txt"
 
     with open(file_path, "r", encoding="utf8") as f:
         file_lines = f.readlines()
@@ -226,33 +279,37 @@ if __name__ == "__main__":
 
     print(final_graph)
     # graphviz_debug(final_graph)
+
+    # change_probability(0.2, ("2", "!"), final_graph)
+    remove_node("1;4", final_graph)
+
     graphviz_debug_pp(final_graph, preprocess)
     print(all_symptoms)
     print(preprocess.name_conversion)
     print()
 
-    already_questioned = {}
-
-    for i in preprocess.lines:
-        print(i)
-
-    # print("***************", rule_to_set("11;8", all_symptoms))
-
-    res = None
-    while True:
-        for i in stack:
-            print(i)
-        # answer = check_question(stack)
-        # answer = check_question_unitary_pp(stack, already_questioned, preprocess)
-        answer = check_question_unitary(stack, already_questioned, preprocess)
-        res = iterate_stack(answer, final_graph, stack)
-        for i in stack:
-            print(i)
-        print("--------")
-
-        if res:
-            if res == "?":
-                print("Erro logico: Negou sintomas de mais")
-            else:
-                print(f"Logo vc tem {preprocess.name_conversion[int(res)]}!")
-            break
+    # already_questioned = {}
+    #
+    # for i in preprocess.lines:
+    #     print(i)
+    #
+    # # print("***************", rule_to_set("11;8", all_symptoms))
+    #
+    # res = None
+    # while True:
+    #     for i in stack:
+    #         print(i)
+    #     # answer = check_question(stack)
+    #     # answer = check_question_unitary_pp(stack, already_questioned, preprocess)
+    #     answer = check_question_unitary(stack, already_questioned, preprocess)
+    #     res = iterate_stack(answer, final_graph, stack)
+    #     for i in stack:
+    #         print(i)
+    #     print("--------")
+    #
+    #     if res:
+    #         if res == "?":
+    #             print("Erro logico: Negou sintomas de mais")
+    #         else:
+    #             print(f"Logo vc tem {preprocess.name_conversion[int(res)]}!")
+    #         break
