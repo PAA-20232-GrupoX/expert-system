@@ -1,5 +1,91 @@
 from graph import *
 
+SKIPPED = None
+
+
+class QuestionManager:
+    def __init__(self):
+        self.questions = []
+        self.index = 0
+        self.already_questioned = {}
+
+        self.current_question = ""
+        self.not_equation = False
+        self.not_question = False
+
+    def __add_question(self, stack):
+        nodes, index = stack[-1]
+        rule = nodes[index][0]
+        self.index = 0
+
+        match = re.match("\*\((.*)", rule)
+        if match:
+            self.questions = match.groups()[0].split(";")
+            self.not_equation = True
+            return
+        self.questions = rule.split(";")
+        self.not_equation = False
+
+    def next_question(self, stack):
+        if len(self.questions) == 0 or self.index >= len(self.questions):
+            self.__add_question(stack)
+
+        question = self.questions[self.index]
+
+        if question[0] == "*":
+            real_question = question[1:]
+            self.not_question = True
+            self.current_question = real_question
+            if real_question not in self.already_questioned:
+                return real_question
+
+        else:
+            self.not_question = False
+            self.current_question = question
+            if question not in self.already_questioned:
+                return question
+
+        return SKIPPED
+
+    def answer_question(self, answer):
+        if self.not_question:
+            if answer == "s":
+                answer = "n"
+            else:
+                answer = "s"
+
+        self.index += 1
+        if self.not_equation:
+            if answer == "n":
+                return "s"
+
+            if self.index >= len(self.questions):
+                return "n"
+
+        else:
+            if answer == "n":
+                return "n"
+
+            if self.index >= len(self.questions):
+                return "s"
+
+        return "l"
+
+    def iterate_node(self, answer):
+        if answer == "ns":
+            return "ns"
+
+        if answer == SKIPPED:
+            if self.already_questioned[self.current_question]:
+                return self.answer_question("s")
+            return self.answer_question("n")
+
+        if answer == "s":
+            self.already_questioned[self.current_question] = True
+        else:
+            self.already_questioned[self.current_question] = False
+        return self.answer_question(answer)
+
 
 # Migrated to graph
 def receive_from_answer():
@@ -34,7 +120,7 @@ if __name__ == "__main__":
     ################ Começo Inicialização
 
     # Local do arquivo
-    file_path = "teste2.txt"
+    file_path = "teste1.txt"
 
     with open(file_path, "r", encoding="utf8") as f:
         file_lines = f.readlines()
@@ -52,14 +138,27 @@ if __name__ == "__main__":
     final_graph = reverse_graph(reversed_graph)
     stack = [[sorted(final_graph[""], key=lambda x: -x[1]), 0]]
 
-    already_questioned = {}
     ################ Fim inicialização
 
     print(f"Dicionario mandado: {send_dict_dict(preprocess.name_conversion)}")
 
+    qm = QuestionManager()
+
     while True:
         print()
-        answer = check_question_unitary(stack, already_questioned, preprocess)  # SEND AND RECEIVE HERE
+        while True:
+            question = qm.next_question(stack)
+            if question != SKIPPED:
+                send_question(question, preprocess)     # Send question
+                answer = receive_from_answer()          # Receive answer
+            else:
+                answer = SKIPPED
+
+            full_answer = qm.iterate_node(answer)
+
+            if full_answer != "l":
+                break
+
         result = iterate_stack(answer, final_graph, stack)
 
         metadata = MetaData(result, stack)
