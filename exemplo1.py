@@ -27,7 +27,7 @@ class QuestionManager:
         self.not_equation = False
 
     def next_question(self, stack):
-        if len(self.questions) == 0 or self.index >= len(self.questions):
+        if len(self.questions) == 0:
             self.__add_question(stack)
 
         question = self.questions[self.index]
@@ -57,22 +57,27 @@ class QuestionManager:
         self.index += 1
         if self.not_equation:
             if answer == "n":
+                self.questions.clear()
                 return "s"
 
             if self.index >= len(self.questions):
+                self.questions.clear()
                 return "n"
 
         else:
             if answer == "n":
+                self.questions.clear()
                 return "n"
 
             if self.index >= len(self.questions):
+                self.questions.clear()
                 return "s"
 
         return "l"
 
     def iterate_node(self, answer):
         if answer == "ns":
+            self.questions.clear()
             return "ns"
 
         if answer == SKIPPED:
@@ -87,19 +92,17 @@ class QuestionManager:
         return self.answer_question(answer)
 
 
-# Migrated to graph
-def receive_from_answer():
-    return input()
+# Receive "s", "n" or "ns"
+def receive_answer():
+    while True:
+        answer = input()
+        if answer in ("s", "n", "ns"):
+            return answer
 
 
-# Migrated to graph
-def send_next_symptom(stack, already_quest):
-    nodes, index = stack[-1]
-    string = nodes[index][0]
-    for symptom in string.split(";"):
-        if symptom not in already_quest:
-            return symptom
-    return "ended"
+# Must send "preprocess.name_conversion[int(question)]"
+def send_question(question, preprocess):
+    print(f"Vc tem {preprocess.name_conversion[int(question)]}?")
 
 
 class MetaData:
@@ -150,7 +153,7 @@ if __name__ == "__main__":
             question = qm.next_question(stack)
             if question != SKIPPED:
                 send_question(question, preprocess)     # Send question
-                answer = receive_from_answer()          # Receive answer
+                answer = receive_answer()          # Receive answer
             else:
                 answer = SKIPPED
 
@@ -158,8 +161,7 @@ if __name__ == "__main__":
 
             if full_answer != "l":
                 break
-
-        result = iterate_stack(answer, final_graph, stack)
+        result = iterate_stack(full_answer, final_graph, stack)
 
         metadata = MetaData(result, stack)
 

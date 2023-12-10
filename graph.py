@@ -92,79 +92,73 @@ def iterate_stack(answer, graph, stack):
     return None
 
 
-# Receive "s", "n" or "ns"
-def receive_answer():
-    while True:
-        answer = input()
-        if answer in ("s", "n", "ns"):
-            return answer
+# # Receive "s", "n" or "ns"
+# def receive_answer():
+#     while True:
+#         answer = input()
+#         if answer in ("s", "n", "ns"):
+#             return answer
+#
+# def check_question(question, already_questioned, preprocess):
+#     if question[0] == "*":
+#         real_question = question[1:]
+#
+#         if real_question in already_questioned:
+#             if already_questioned[real_question]:
+#                 return "n"
+#             else:
+#                 return "s"
+#
+#         else:
+#             send_question(real_question, preprocess)
+#             answer = receive_answer()  # **************
+#             if answer == "s":
+#                 already_questioned[real_question] = True
+#                 return "n"
+#             if answer == "n":
+#                 already_questioned[real_question] = False
+#                 return "s"
+#
+#             return "ns"
+#
+#     else:
+#         if question in already_questioned:
+#             if already_questioned[question]:
+#                 return "s"
+#             else:
+#                 return "n"
+#
+#         send_question(question, preprocess)
+#         answer = receive_answer()
+#         if answer == "s":
+#             already_questioned[question] = True
+#             return "s"
+#         if answer == "n":
+#             already_questioned[question] = False
+#             return "n"
+#
+#     return "ns"
 
 
-# Must send "preprocess.name_conversion[int(question)]"
-def send_question(question, preprocess):
-    print(f"Vc tem {preprocess.name_conversion[int(question)]}?")
-
-
-def check_question(question, already_questioned, preprocess):
-    if question[0] == "*":
-        real_question = question[1:]
-
-        if real_question in already_questioned:
-            if already_questioned[real_question]:
-                return "n"
-            else:
-                return "s"
-
-        else:
-            send_question(real_question, preprocess)
-            answer = receive_answer()  # **************
-            if answer == "s":
-                already_questioned[real_question] = True
-                return "n"
-            if answer == "n":
-                already_questioned[real_question] = False
-                return "s"
-
-            return "ns"
-
-    else:
-        if question in already_questioned:
-            if already_questioned[question]:
-                return "s"
-            else:
-                return "n"
-
-        send_question(question, preprocess)
-        answer = receive_answer()
-        if answer == "s":
-            already_questioned[question] = True
-            return "s"
-        if answer == "n":
-            already_questioned[question] = False
-            return "n"
-
-    return "ns"
-
-
-def check_question_unitary(stack, already_questioned, preprocess):
-    nodes, index = stack[-1]
-    rule = nodes[index][0]
-
-    match = re.match("\*\((.*)", rule)
-    if match:
-        for question in match.groups()[0].split(";"):
-            answer = check_question(question, already_questioned, preprocess)
-            if answer == "s":
-                return "n"
-            if answer == "ns":
-                return "ns"
-        return "n"
-
-    for question in rule.split(";"):
-        answer = check_question(question, already_questioned, preprocess)
-        if answer in ("n", "ns"):
-            return answer
-    return "s"
+# def check_question_unitary(stack, already_questioned, preprocess):
+#     nodes, index = stack[-1]
+#     rule = nodes[index][0]
+#
+#     match = re.match("\*\((.*)", rule)
+#     if match:
+#         for question in match.groups()[0].split(";"):
+#             answer = check_question(question, already_questioned, preprocess)
+#             if answer == "s":
+#                 return "n"
+#             if answer == "ns":
+#                 return "ns"
+#         return "n"
+#
+#     for question in rule.split(";"):
+#         answer = check_question(question, already_questioned, preprocess)
+#         if answer in ("n", "ns"):
+#             return answer
+#     return "s"
 
 
 def graphviz_debug(graph):
@@ -246,18 +240,6 @@ def change_probability(new_prop, edge, graph):
 
     graph.clear()
     graph.update(reverse_graph(reversed_graph))
-
-
-def receive_messages(message, val, graph):
-    if message == "answer":
-        return val
-    if message == "pop":
-        remove_node(val, graph)
-        return val
-    if message == "restart":
-        return "r"
-
-    return
 
 
 if __name__ == "__main__":
