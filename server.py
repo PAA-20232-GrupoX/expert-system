@@ -147,6 +147,31 @@ def send_metadata(metadata):
 
 qm = QuestionManager()
 
+@app.get("/graph")
+async def root():
+    ################ Começo Inicialização
+
+    # Local do arquivo
+    file_path = "teste2.txt"
+
+    with open(file_path, "r", encoding="utf8") as f:
+        file_lines = f.readlines()
+
+    # all_symptoms = read_symptoms_lines(file_lines)
+    preprocess = PreProcess(file_path)
+    preprocess.execute()
+
+    all_symptoms = preprocess.all_symptoms
+
+    # reversed_graph = read_entry(file_lines, all_symptoms)
+    reversed_graph = read_entry(preprocess.lines, all_symptoms)
+    back_propagate(reversed_graph)
+
+    final_graph = reverse_graph(reversed_graph)
+    
+    ################ Fim inicialização
+    return {"graph": final_graph }
+
 @app.get("/tree")
 async def root():
     ################ Começo Inicialização
