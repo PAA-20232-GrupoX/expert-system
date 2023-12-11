@@ -1,0 +1,20 @@
+“C algoritmo de gradient boosting”, (“S rótulos claros”; “S grande volume”; “S desbalanceamento de classes”; “S alta dimensionalidade”; “S necessidade de classificação precisa”), 0.8
+“C algoritmo de detecção de outliers LOF (Local Outlier Factor)”, (“S outliers perceptíveis”; “S características espaciais”; “S alta dimensionalidade”; “S sensibilidade a outliers”), 0.7
+“C redes neurais para processamento de linguagem natural”, (“S grande quantidade de texto”; “S necessidade de classificação textual”; “S variação linguística”; “S expressões de sentimentos”; “S demanda por tradução”), 0.9
+“C algoritmo de busca tabu”, (“S parâmetros ajustáveis para otimização”; “S desafios de otimização combinatória”; “S busca por soluções ótimas locais”; “S complexidade computacional elevada”), 0.6
+“C modelo de Markov oculto”, (“S dados sequenciais”; “S necessidade de modelagem de sequências”; “S padrões reconhecíveis”; “S probabilidades de eventos futuros”), 0.8
+“C algoritmo de agrupamento Mean Shift”, (“S falta de rótulos pré-definidos”; “S necessidade de identificar clusters naturalmente”; “S variações de densidade nos dados”; “S interesse em exploração de dados”), 0.65
+“C modelo de redes neurais para previsão de séries temporais”, (“S padrões temporais”; “S necessidade de previsão temporal”; “S tendências ao longo do tempo”; “S predições de curto e longo prazo”), 0.2
+“C algoritmo de aprendizado semi-supervisionado”, (“S rótulos parciais”; “S economia na rotulação”; “S grandes volumes de dados”), 0.75
+“C algoritmo de otimização de colônia de formigas”, (“S desafios de roteamento”; “S necessidade de otimizar caminhos”; “S comportamentos coletivos para modelar”; “S problemas logísticos complexos”), 0.7
+“C algoritmo de aprendizado profundo para detecção de objetos”, (“S conteúdo imagético”; “S tarefas de detecção de objetos”; “S necessidade de análise de vídeo em tempo real”; “S padrões visuais distintos”), 0.85
+“C regressão linear”, (“S relações lineares entre variáveis”; “S pequena quantidade de variáveis”; “S necessidade de previsão contínua”), 0.8
+“C Naive Bayes para classificação”, (“S categorização simples de dados”; “S independência entre as variáveis”; “S pequeno volume de dados”), 0.7
+“C algoritmo K-Nearest Neighbors (KNN)”, (“S tarefas de classificação ou regressão simples”; “S dados rotulados”; “S pequenas distâncias entre pontos de dados”), 0.75
+“C Support Vector Machine (SVM) para classificação”, (“S necessidade de margem de separação clara”; “S dados de alta dimensionalidade”; “S classificação binária ou multiclasse”), 0.85
+“C algoritmo de clustering K-means”, (“S necessidade de agrupamento de dados”; “S clara distinção entre clusters”; “S dados com tendências de agrupamento”), 0.9
+“C rede neural artificial para classificação”, (“S tarefas complexas de classificação”; “S grande volume de dados”; “S alta variabilidade nos dados”), 0.8
+“C algoritmo de Árvore de Decisão”, (“S tomada de decisão baseada em regras”; “S dados com estruturas hierárquicas”; “S classificação ou regressão simples”), 0.7
+“C Random Forest para classificação ou regressão”, (“S conjuntos de dados grandes e complexos”; “S necessidade de redução de overfitting”; “S múltiplas variáveis de decisão”), 0.85
+“C algoritmo de otimização por enxame de partículas (PSO)”, (“S busca por soluções ótimas”; “S problemas de otimização contínua”; “S espaço de busca amplo”), 0.6
+“C algoritmo de detecção de anomalias baseado em Autoencoder”, (“S dados com comportamentos anômalos”; “S grandes volumes de dados”; “S aprendizado não supervisionado”), 0.75
