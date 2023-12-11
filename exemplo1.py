@@ -101,7 +101,10 @@ def receive_answer():
 
 
 # Must send "preprocess.name_conversion[int(question)]"
-def send_question(question, preprocess):
+def send_question(question):
+    print(f"Vc tem {question}?")
+
+def send_question_pp(question, preprocess):
     print(f"Vc tem {preprocess.name_conversion[int(question)]}?")
 
 
@@ -128,14 +131,14 @@ if __name__ == "__main__":
     with open(file_path, "r", encoding="utf8") as f:
         file_lines = f.readlines()
 
-    # all_symptoms = read_symptoms_lines(file_lines)
-    preprocess = PreProcess(file_path)
-    preprocess.execute()
+    all_symptoms = read_symptoms_lines(file_lines)
+    # preprocess = PreProcess(file_path)
+    # preprocess.execute()
 
-    all_symptoms = preprocess.all_symptoms
+    # all_symptoms = preprocess.all_symptoms
 
-    # reversed_graph = read_entry(file_lines, all_symptoms)
-    reversed_graph = read_entry(preprocess.lines, all_symptoms)
+    reversed_graph = read_entry(file_lines, all_symptoms)
+    # reversed_graph = read_entry(preprocess.lines, all_symptoms)
     back_propagate(reversed_graph)
 
     final_graph = reverse_graph(reversed_graph)
@@ -143,16 +146,16 @@ if __name__ == "__main__":
 
     ################ Fim inicialização
 
-    print(f"Dicionario mandado: {send_dict_dict(preprocess.name_conversion)}")
+    # print(f"Dicionario mandado: {send_dict_dict(preprocess.name_conversion)}")
 
     qm = QuestionManager()
 
     while True:
-        print()
+        # print()
         while True:
             question = qm.next_question(stack)
             if question != SKIPPED:
-                send_question(question, preprocess)     # Send question
+                send_question(question)     # Send question
                 answer = receive_answer()          # Receive answer
             else:
                 answer = SKIPPED
@@ -174,6 +177,6 @@ if __name__ == "__main__":
             if result == "?":
                 print("Erro logico: Negou sintomas de mais")
             else:
-                print(f"Logo vc tem {preprocess.name_conversion[int(result)]}!")
+                print(f"Logo vc tem {result}!")
             break
 

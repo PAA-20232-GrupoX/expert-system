@@ -5,7 +5,7 @@ from collections import defaultdict
 def read_symptoms_lines(file_lines):
     res = set()
     for line in file_lines:
-        for symp in re.findall("“S\s*((?:(?:\w|\*|-)*\s*)*)”", line):
+        for symp in re.findall("(?:“|”|\")S\s*((?:(?:\w|\*|-)*\s*)*)(?:“|”|\")", line):
             res.add(symp)
 
     return res
@@ -15,7 +15,7 @@ def combine_symptoms(symptoms):
     aux = symptoms.split(";")
 
     for i in range(len(aux)):
-        match = re.match("\s*(NOT|)\s*“(?:S|C)\s*((?:(?:\w|\*|-)*\s*)*)”", aux[i]).groups()
+        match = re.match("\s*(NOT|)\s*(?:“|”|\")(?:S|C)\s*((?:(?:\w|\*|-)*\s*)*)(?:“|”|\")", aux[i]).groups()
         if match[0] == "NOT":
             aux[i] = "*" + match[1]
         else:
@@ -25,7 +25,7 @@ def combine_symptoms(symptoms):
 
 
 def read_new_command(line):
-    match_total = re.match("“(?:S|C)\s*((?:(?:\w|\*|-)*\s*)*)”,\s*(NOT|)\s*\((.*)\),\s*([0-9.]+)",
+    match_total = re.match("(?:“|”|\")(?:S|C)\s*((?:(?:\w|\*|-)*\s*)*)(?:“|”|\"),\s*(NOT|)\s*\((.*)\),\s*([0-9.]+)",
                            line)
     match = match_total.groups()
     if match[1] == "":
