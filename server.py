@@ -1,6 +1,8 @@
+from http.client import HTTPException
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from typing import Union
 from graph import *
 
 
@@ -19,7 +21,6 @@ app.add_middleware(
 )
 
 SKIPPED = None
-
 
 class QuestionManager:
     def __init__(self):
@@ -236,6 +237,22 @@ async def root(data: AnswerData):
         
         answer = SKIPPED
         full_answer = qm.iterate_node(answer)
-        
-    
 
+@app.delete("/remove_node/{node_id}")
+async def remove_node_endpoint(node_id: str):
+    try:
+        stack = [[sorted(final_graph[""], key=lambda x: -x[1]), 0]]  # Supondo uma stack inicial padrão
+        remove_node(node_id, final_graph)        
+        # Obter próxima pergunta após remover o nó
+        question = qm.next_question(stack)
+
+        return {
+            "message": f"Nó {node_id} removido com sucesso",
+            "graph": final_graph,
+            "stack": stack,
+            "next_symptom": question
+        }
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Nó {node_id} não encontrado no grafo")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")
