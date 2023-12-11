@@ -1,6 +1,7 @@
 from collections import deque
 from read_rules_file import *
 from preprocess import *
+import json
 
 # A mudar:
 #     O grafo é salvado como final_graph (linha 191), ainda falta criar o JSON
@@ -11,6 +12,17 @@ from preprocess import *
 # Há dois arquivos de teste (teste1 e teste2), se quiser mudar mude em linha 188
 final_graph = {}  # Defina a variável como global
 
+
+def save_graph_to_file(graph, filename):
+    with open(filename, "w", encoding="utf8") as f:
+        json.dump(graph, f)
+
+def load_graph_from_file(filename):
+    try:
+        with open(filename, "r", encoding="utf8") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return None
 
 def back_propagate(reversed_graph):
 
@@ -201,13 +213,12 @@ def graphviz_debug_pp(graph, pp):
                         f.write(f"\"{v[0]}\" [label={v[1]}]")
                     f.write("\n")
 
-
-def remove_node(node, graph):
-    # graph[node].clear()
+def remove_node(node, graph, filename="graph.json"):
     reversed_graph = reverse_graph(graph)
     reversed_graph.pop(node)
     graph.clear()
     graph.update(reverse_graph(reversed_graph))
+    save_graph_to_file(graph, filename)
 
 
 def change_probability(new_prop, edge, graph):
