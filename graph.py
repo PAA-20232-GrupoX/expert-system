@@ -9,6 +9,7 @@ from preprocess import *
 # OBS:
 # "" é o nó inicial e "!" é o nó terminal. As respostas são "s", "n" e "ns".
 # Há dois arquivos de teste (teste1 e teste2), se quiser mudar mude em linha 188
+final_graph = {}  # Defina a variável como global
 
 
 def back_propagate(reversed_graph):
