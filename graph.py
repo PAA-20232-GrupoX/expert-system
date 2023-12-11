@@ -210,34 +210,30 @@ def remove_node(node, graph):
 
 
 def change_probability(new_prop, edge, graph):
-    old_prob = 0
-    for i in range(len(graph[edge[0]])):
-        val = graph[edge[0]][i]
-        if val[0] == edge[1]:
-            old_prob = val[1]
+    # Encontra a aresta na lista de adjacência do nó edge[0] e atualiza a probabilidade
+    for i, (neighbor, old_prob) in enumerate(graph[edge[0]]):
+        if neighbor == edge[1]:
             graph[edge[0]][i][1] = new_prop
+            break
 
-    increment = new_prop-old_prob
+    # Calcula o incremento na probabilidade
+    increment = new_prop - old_prob
+
+    # Propagação inversa usando uma fila
     reversed_graph = reverse_graph(graph)
-
-    queue = deque()
-    queue.append(edge[0])
-
-    for i in range(len(reversed_graph[edge[0]])):
-        reversed_graph[edge[0]][i][1] += increment
+    queue = deque([edge[0]])
 
     while queue:
-        node = queue.popleft()
-        for edges in reversed_graph[node]:
-            next_edge = edges[0]
+        current_node = queue.popleft()
+        for neighbor, prob in reversed_graph[current_node]:
+            queue.append(neighbor)
 
-            queue.append(next_edge)
+            # Atualiza as probabilidades na lista de adjacência reversa
+            for i, (inner_neighbor, inner_prob) in enumerate(reversed_graph[neighbor]):
+                if inner_neighbor == current_node:
+                    reversed_graph[neighbor][i][1] += increment
 
-            inner_edges = reversed_graph[next_edge]
-
-            for i in range(len(inner_edges)):
-                inner_edges[i][1] += increment
-
+    # Atualiza o grafo original com as alterações
     graph.clear()
     graph.update(reverse_graph(reversed_graph))
 

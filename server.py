@@ -1,3 +1,5 @@
+from typing import Tuple, List, Union
+from types import UnionType
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -20,6 +22,10 @@ app.add_middleware(
 )
 
 SKIPPED = None
+class ChangeProbabilityData(BaseModel):
+    new_prop: float#nova probabilidade
+    edge: Tuple[str, str]#  aresta que você deseja modificar
+    stack: List[List[Union[List[Tuple[str, float]], int]]] #Cada sublista parece ter dois elementos: uma lista de tuplas representando nós do grafo e um índice
 
 
 class QuestionManager:
@@ -232,6 +238,33 @@ async def remove_node_endpoint(node_id: str):
         raise HTTPException(status_code=404, detail=f"Nó {node_id} não encontrado no grafo")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")
+
+@app.post("/change_probability")
+async def change_probability_endpoint(data: ChangeProbabilityData):
+    try:
+        new_prop = data.new_prop #nova probabilidade
+        edge = data.edge        #aresta que você deseja modificar
+        stack = data.stack
+
+        # Chama a função para modificar a probabilidade
+        change_probability(new_prop, edge, final_graph)
+
+        # Obtém a próxima pergunta após a modificação
+        question = qm.next_question(stack)
+
+        # Retorna a resposta com o novo grafo, stack e próxima pergunta
+        return {
+            "message": f"Probabilidade modificada com sucesso",
+            "graph": final_graph,
+            "stack": stack,
+            "next_symptom": question
+        }
+
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Edge {edge} não encontrada no grafo")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")
+
         
     
 
