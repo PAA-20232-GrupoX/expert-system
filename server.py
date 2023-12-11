@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from graph import *
@@ -179,6 +179,27 @@ class AnswerData(BaseModel):
     graph: dict
     stack: list
     answer: str
+
+@app.post("/upload")
+async def upload_file(file: UploadFile = File(...)):
+    try:
+        contents = await file.read()
+        content_lines = contents.decode("utf-8").split("\n")
+
+        preprocess = PreProcess(lines=content_lines)
+        preprocess.execute()
+
+        all_symptoms = preprocess.all_symptoms
+
+        reversed_graph = read_entry(preprocess.lines, all_symptoms)
+        back_propagate(reversed_graph)
+
+        final_graph = reverse_graph(reversed_graph)
+        stack = [[sorted(final_graph[""], key=lambda x: -x[1]), 0]]
+
+        return {"message": "File uploaded successfully"}
+    except Exception as e:
+        return {"error": str(e)}
 
 @app.post("/answer")
 async def root(data: AnswerData):

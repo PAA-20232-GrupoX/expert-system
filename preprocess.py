@@ -2,9 +2,9 @@ import re
 
 
 class PreProcess:
-    def __init__(self, full_path):
+    def __init__(self, full_path=None, lines=[]):
         self.path = full_path
-        self.lines = []
+        self.lines = lines
         self.name_conversion = {}
         self.all_symptoms = set()
         self.counter = 0
@@ -40,8 +40,9 @@ class PreProcess:
         return "".join(split_list)
 
     def execute(self):
-        with open(self.path, "r", encoding="utf8") as f:
-            self.lines = f.readlines()
+        if self.path:
+            with open(self.path, "r", encoding="utf8") as f:
+                self.lines = f.readlines()
 
         num_lines = len(self.lines)
 
