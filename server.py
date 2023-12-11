@@ -1,4 +1,22 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from graph import *
+
+
+app = FastAPI()
+
+origins = [
+    "http://localhost:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 SKIPPED = None
 
@@ -25,6 +43,15 @@ class QuestionManager:
             return
         self.questions = rule.split(";")
         self.not_equation = False
+
+    def reset(self):
+        self.questions = []
+        self.index = 0
+        self.already_questioned = {}
+
+        self.current_question = ""
+        self.not_equation = False
+        self.not_question = False
 
     def next_question(self, stack):
         if len(self.questions) == 0:
@@ -118,12 +145,14 @@ def send_dict_dict(dict):
 def send_metadata(metadata):
     return metadata
 
+qm = QuestionManager()
 
-if __name__ == "__main__":
+@app.get("/tree")
+async def root():
     ################ Começo Inicialização
 
     # Local do arquivo
-    file_path = "teste1.txt"
+    file_path = "teste2.txt"
 
     with open(file_path, "r", encoding="utf8") as f:
         file_lines = f.readlines()
@@ -141,39 +170,47 @@ if __name__ == "__main__":
     final_graph = reverse_graph(reversed_graph)
     stack = [[sorted(final_graph[""], key=lambda x: -x[1]), 0]]
 
+    question = qm.next_question(stack)
+    
     ################ Fim inicialização
+    return {"graph": final_graph, "stack": stack, "next_symptom": question }
 
-    print(f"Dicionario mandado: {send_dict_dict(preprocess.name_conversion)}")
+class AnswerData(BaseModel):
+    graph: dict
+    stack: list
+    answer: str
 
-    qm = QuestionManager()
-
-    while True:
-        print()
+@app.post("/answer")
+async def root(data: AnswerData):
+    full_answer = qm.iterate_node(data.answer)
+    
+    if full_answer == "l":
         while True:
-            question = qm.next_question(stack)
+            question = qm.next_question(data.stack)
             if question != SKIPPED:
-                send_question(question, preprocess)     # Send question
-                answer = receive_answer()          # Receive answer
-            else:
-                answer = SKIPPED
-
+                return {"result": False, "stack": data.stack, "next_symptom": question}
+            
+            answer = SKIPPED
             full_answer = qm.iterate_node(answer)
-
+            
             if full_answer != "l":
                 break
-        result = iterate_stack(full_answer, final_graph, stack)
+    
+    result = iterate_stack(full_answer, data.graph, data.stack)
 
-        metadata = MetaData(result, stack)
+    if result:
+        qm.reset()
+        return {"result": result, "stack": data.stack, "next_symptom": None}
 
-        # Aqui envia os metadados, possívelmente o possível resultado da predição **************
-        # e o estado da pilha de execução
-        send_metadata(metadata)
-        print(f"Metadados enviados: {result} {stack}")
-
-        if result:
-            if result == "?":
-                print("Erro logico: Negou sintomas de mais")
-            else:
-                print(f"Logo vc tem {preprocess.name_conversion[int(result)]}!")
-            break
+    
+    while True:
+        question = qm.next_question(data.stack)
+        if question != SKIPPED:
+            print(question, "2")
+            return {"result": False, "stack": data.stack, "next_symptom": question}
+        
+        answer = SKIPPED
+        full_answer = qm.iterate_node(answer)
+        
+    
 

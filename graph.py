@@ -12,26 +12,22 @@ from preprocess import *
 
 
 def back_propagate(reversed_graph):
-    visited_node = set()
 
     queue = deque()
     queue.append("!")
 
     while queue:
         node = queue.popleft()
-        if node not in visited_node:
-            visited_node.add(node)
+        for edges in reversed_graph[node]:
+            summed_val = edges[1]
+            next_edge = edges[0]
 
-            for edges in reversed_graph[node]:
-                summed_val = edges[1]
-                next_edge = edges[0]
+            queue.append(next_edge)
 
-                queue.append(next_edge)
+            inner_edges = reversed_graph[next_edge]
 
-                inner_edges = reversed_graph[next_edge]
-
-                for i in range(len(inner_edges)):
-                    inner_edges[i][1] += summed_val
+            for i in range(len(inner_edges)):
+                inner_edges[i][1] += summed_val
 
     return reversed_graph
 
@@ -96,58 +92,73 @@ def iterate_stack(answer, graph, stack):
     return None
 
 
-def check_question(stack):
-    nodes, index = stack[-1]
-    string = nodes[index][0]
+# # Receive "s", "n" or "ns"
+# def receive_answer():
+#     while True:
+#         answer = input()
+#         if answer in ("s", "n", "ns"):
+#             return answer
+#
+# def check_question(question, already_questioned, preprocess):
+#     if question[0] == "*":
+#         real_question = question[1:]
+#
+#         if real_question in already_questioned:
+#             if already_questioned[real_question]:
+#                 return "n"
+#             else:
+#                 return "s"
+#
+#         else:
+#             send_question(real_question, preprocess)
+#             answer = receive_answer()  # **************
+#             if answer == "s":
+#                 already_questioned[real_question] = True
+#                 return "n"
+#             if answer == "n":
+#                 already_questioned[real_question] = False
+#                 return "s"
+#
+#             return "ns"
+#
+#     else:
+#         if question in already_questioned:
+#             if already_questioned[question]:
+#                 return "s"
+#             else:
+#                 return "n"
+#
+#         send_question(question, preprocess)
+#         answer = receive_answer()
+#         if answer == "s":
+#             already_questioned[question] = True
+#             return "s"
+#         if answer == "n":
+#             already_questioned[question] = False
+#             return "n"
+#
+#     return "ns"
 
-    print(f'Vc tem {" e ".join(string.split(";"))}?')
-    return input()
 
-
-def check_question_unitary(stack, already_quest):
-    nodes, index = stack[-1]
-    string = nodes[index][0]
-    for symptom in string.split(";"):
-        if symptom not in already_quest:
-            while True:
-                print(f'Vc tem {symptom}?')
-                aux_answer = input()
-
-                if aux_answer == "s":
-                    already_quest[symptom] = True
-                    break
-                elif aux_answer == "n":
-                    already_quest[symptom] = False
-                    return "n"
-                elif aux_answer == "ns":
-                    return "ns"
-        else:
-            if not already_quest[symptom]:
-                return "n"
-    return "s"
-
-
-def check_question_unitary_pp(stack, already_quest, preprocess):
-    nodes, index = stack[-1]
-    string = nodes[index][0]
-    for symptom in string.split(";"):
-        if symptom not in already_quest:
-            while True:
-                print(f'Vc tem {preprocess.name_conversion[int(symptom)]}?')
-                aux_answer = input()
-
-                if aux_answer == "s":
-                    already_quest[symptom] = True
-                    break
-                elif aux_answer == "n":
-                    already_quest[symptom] = False
-                    return "n"
-                elif aux_answer == "ns":
-                    return "ns"
-        else:
-            if not already_quest[symptom]:
-                return "n"
-    return "s"
+# def check_question_unitary(stack, already_questioned, preprocess):
+#     nodes, index = stack[-1]
+#     rule = nodes[index][0]
+#
+#     match = re.match("\*\((.*)", rule)
+#     if match:
+#         for question in match.groups()[0].split(";"):
+#             answer = check_question(question, already_questioned, preprocess)
+#             if answer == "s":
+#                 return "n"
+#             if answer == "ns":
+#                 return "ns"
+#         return "n"
+#
+#     for question in rule.split(";"):
+#         answer = check_question(question, already_questioned, preprocess)
+#         if answer in ("n", "ns"):
+#             return answer
+#     return "s"
 
 
 def graphviz_debug(graph):
@@ -190,6 +201,47 @@ def graphviz_debug_pp(graph, pp):
                     f.write("\n")
 
 
+def remove_node(node, graph):
+    # graph[node].clear()
+    reversed_graph = reverse_graph(graph)
+    reversed_graph.pop(node)
+    graph.clear()
+    graph.update(reverse_graph(reversed_graph))
+
+
+def change_probability(new_prop, edge, graph):
+    old_prob = 0
+    for i in range(len(graph[edge[0]])):
+        val = graph[edge[0]][i]
+        if val[0] == edge[1]:
+            old_prob = val[1]
+            graph[edge[0]][i][1] = new_prop
+
+    increment = new_prop-old_prob
+    reversed_graph = reverse_graph(graph)
+
+    queue = deque()
+    queue.append(edge[0])
+
+    for i in range(len(reversed_graph[edge[0]])):
+        reversed_graph[edge[0]][i][1] += increment
+
+    while queue:
+        node = queue.popleft()
+        for edges in reversed_graph[node]:
+            next_edge = edges[0]
+
+            queue.append(next_edge)
+
+            inner_edges = reversed_graph[next_edge]
+
+            for i in range(len(inner_edges)):
+                inner_edges[i][1] += increment
+
+    graph.clear()
+    graph.update(reverse_graph(reversed_graph))
+
+
 if __name__ == "__main__":
     file_path = "teste1.txt"
 
@@ -208,31 +260,38 @@ if __name__ == "__main__":
     stack = [[sorted(final_graph[""], key=lambda x: -x[1]), 0]]
 
     print(final_graph)
-    graphviz_debug(final_graph)
-    # graphviz_debug_pp(final_graph, preprocess)
+    # graphviz_debug(final_graph)
+
+    # change_probability(0.2, ("2", "!"), final_graph)
+    remove_node("1;4", final_graph)
+
+    graphviz_debug_pp(final_graph, preprocess)
     print(all_symptoms)
     print(preprocess.name_conversion)
     print()
 
-    already_questioned = {}
-
-    for i in preprocess.lines:
-        print(i)
-
-    res = None
-    while True:
-        for i in stack:
-            print(i)
-        # answer = check_question(stack)
-        answer = check_question_unitary_pp(stack, already_questioned, preprocess)
-        res = iterate_stack(answer, final_graph, stack)
-        for i in stack:
-            print(i)
-        print("--------")
-
-        if res:
-            if res == "?":
-                print("Erro logico: Negou sintomas de mais")
-            else:
-                print(f"Logo vc tem {preprocess.name_conversion[int(res)]}!")
-            break
+    # already_questioned = {}
+    #
+    # for i in preprocess.lines:
+    #     print(i)
+    #
+    # # print("***************", rule_to_set("11;8", all_symptoms))
+    #
+    # res = None
+    # while True:
+    #     for i in stack:
+    #         print(i)
+    #     # answer = check_question(stack)
+    #     # answer = check_question_unitary_pp(stack, already_questioned, preprocess)
+    #     answer = check_question_unitary(stack, already_questioned, preprocess)
+    #     res = iterate_stack(answer, final_graph, stack)
+    #     for i in stack:
+    #         print(i)
+    #     print("--------")
+    #
+    #     if res:
+    #         if res == "?":
+    #             print("Erro logico: Negou sintomas de mais")
+    #         else:
+    #             print(f"Logo vc tem {preprocess.name_conversion[int(res)]}!")
+    #         break

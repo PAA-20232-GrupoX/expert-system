@@ -21,6 +21,11 @@ Copy code
 python main.py
 ## Analisar Condições:
 
+Executar servidor:
+```
+uvicorn server:app --reload
+```
+
 Utilize as regras convertidas em JSON para realizar inferências sobre as condições específicas.
 Estrutura do Projeto
 main.py: Script principal para análise e conversão das regras.
